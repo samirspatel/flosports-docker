@@ -1,3 +1,39 @@
+application:
+    build: build/application
+    volumes:
+        - ../symfony-php:/app
+        - ./data/redis:/var/lib/redis
+        - ./data/mysql:/var/lib/mysql
+php:
+    build: build/php
+    environment:
+        - APP_SITE_NAME=flosports
+    volumes_from:
+        - application
+    working_dir: /app
+    links:
+        - db
+        - redis
+
+db:
+    image: mysql:5.7
+    ports:
+        - "3307:3306"
+    environment:
+        MYSQL_DATABASE: FloSports
+        MYSQL_USER: flosports
+        MYSQL_PASSWORD: flosports
+        MYSQL_ROOT_PASSWORD: flosports
+    volumes_from:
+        - application
+
+redis:
+    build: build/redis
+    volumes_from:
+        - application
+    ports:
+        - "6380:6379"
+
 nginx:
     build: build/nginx
     environment:
@@ -11,32 +47,5 @@ nginx:
     links:
         - php
         - redis
-    volumes:
-        - ../flosports-cms:/app
-redis:
-    build: build/redis
-    volumes:
-        - ./data/redis:/var/lib/mysql
-    ports:
-        - "6380:6379"
-db:
-    image: mysql:5.7
-    ports:
-        - "3307:3306"
-    environment:
-        MYSQL_DATABASE: FloSports
-        MYSQL_USER: flosports
-        MYSQL_PASSWORD: flosports
-        MYSQL_ROOT_PASSWORD: flosports
-    volumes:
-        - ./data/mysql:/var/lib/mysql
-php:
-    build: build/php
-    environment:
-        - APP_SITE_NAME=flosports
-    volumes:
-        - ../flosports-cms:/app
-    working_dir: /app
-    links:
-        - db
-        - redis
+    volumes_from:
+        - application
