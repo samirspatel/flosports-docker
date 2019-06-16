@@ -1,3 +1,4 @@
+#
 application:
     build: build/application
     volumes:
